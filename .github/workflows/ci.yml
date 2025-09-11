@@ -615,6 +615,7 @@ jobs:
         meson test -C build --print-errorlogs --print-errorlogs $(meson test -C build --list | grep -v emul)
 
   clang-qemu:
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -624,57 +625,53 @@ jobs:
           arch_deb: armhf
           arch_gnu_abi: eabihf
           arch_gnu: arm
-          distro: ubuntu-24.04
         - version: 18
           cross: aarch64
           arch_gnu: aarch64
           arch_deb: arm64
-          distro: ubuntu-24.04
         - version: 18
           extra: -no-extras
           cross: aarch64
           arch_gnu: aarch64
           arch_deb: arm64
-          distro: ubuntu-24.04
         - version: 18
           cross: armel
           arch_gnu_abi: eabi
           arch_deb: armel
           arch_gnu: arm
-          distro: ubuntu-24.04
         - version: 18
           cross: riscv64
           arch_gnu: riscv64
           arch_deb: riscv64
-          distro: ubuntu-24.04
-        # - version: 18
-        #   cross: s390x
-        #   arch_gnu: s390x
-        #   arch_deb: s390x
-        #   distro: ubuntu-24.04
         - version: 18
           cross: ppc64el
           arch_deb: ppc64el
           arch_gnu: powerpc64le
-          distro: ubuntu-24.04
         # - version: 18
         #   cross: mips64el
         #   arch_deb: mips64el
         #   arch_gnu: mips64el
         #   arch_gnu_abi: abi64
-        #   distro: ubuntu-24.04
         - version: 18
           cross: loongarch64
           arch_deb: loong64
           arch_gnu: loongarch64
-          distro: ubuntu-24.04
-    runs-on: ${{ matrix.distro }}
+        - version: 21
+          cross: s390x
+          arch_gnu: s390x
+          arch_deb: s390x
     steps:
     - uses: actions/checkout@v5
       with:
         submodules: recursive
     - name: CPU Information
       run: cat /proc/cpuinfo
+    - name: Install nightly llvm
+      if: ${{ matrix.cross == 's390x' }}
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 21
     - name: Install APT Dependencies
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa && \
